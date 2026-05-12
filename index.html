@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackerRank | Corporate NPS Calculator (80CCD(2))</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F7F5;
+    --surface:#FFFFFF;
+    --surface-2:#F1EFE8;
+    --text:#1F1F1D;
+    --text-secondary:#5F5E5A;
+    --text-tertiary:#888780;
+    --border:rgba(0,0,0,0.10);
+    --border-strong:rgba(0,0,0,0.18);
+    --brand:#00EA64;     /* HackerRank green */
+    --brand-dark:#0B6E33;
+    --brand-soft:#E4FBEC;
+    --info:#185FA5;
+    --info-soft:#E6F1FB;
+    --warn:#854F0B;
+    --warn-soft:#FAEEDA;
+    --danger:#A32D2D;
+    --danger-soft:#FCEBEB;
+    --success:#0F6E56;
+    --success-soft:#E1F5EE;
+    --radius-sm:6px;
+    --radius-md:8px;
+    --radius-lg:12px;
+    --radius-xl:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Manrope',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.55;font-feature-settings:'cv11','ss01','ss03'}
+  .page{max-width:1080px;margin:0 auto;padding:24px 20px 64px}
+  header.brand{display:flex;align-items:center;gap:16px;padding:10px 0 24px;border-bottom:0.5px solid var(--border);margin-bottom:24px}
+  .logo-mark{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;background:#0E1622;border-radius:12px;flex-shrink:0}
+  .logo-mark svg{display:block;width:100%;height:100%}
+  .logo-wordmark{height:22px;display:block}
+  .brand-text h1{font-size:20px;margin:0;font-weight:600;letter-spacing:-0.2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .brand-text p{margin:4px 0 0;color:var(--text-secondary);font-size:13px}
+  .brand-divider{width:1px;height:18px;background:var(--border-strong);display:inline-block}
+  .hero{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:20px}
+  .hero h2{margin:0 0 6px;font-size:18px;font-weight:600}
+  .hero p{margin:0;color:var(--text-secondary);font-size:14px}
+  .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px}
+  .card h3{margin:0 0 14px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .card h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+  .field{margin-bottom:14px}
+  .label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--text-secondary);margin-bottom:6px;gap:8px}
+  .label .hint{font-size:12px;color:var(--text-tertiary);font-weight:400}
+  .control{position:relative}
+  input[type="number"], select{
+    width:100%;height:38px;border:0.5px solid var(--border-strong);border-radius:var(--radius-md);
+    padding:0 12px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input[type="number"]:focus, select:focus{outline:none;border-color:var(--brand-dark);box-shadow:0 0 0 3px var(--brand-soft)}
+  input[type="number"].error{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
+  .prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);font-size:13px;pointer-events:none}
+  .prefix + input{padding-left:28px}
+  .derived{background:var(--surface-2);border:0.5px dashed var(--border-strong);color:var(--text-secondary);cursor:not-allowed}
+  .errmsg{display:none;font-size:12px;color:var(--danger);margin-top:6px}
+  .errmsg.show{display:block}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .helper{font-size:12px;color:var(--text-tertiary);margin-top:6px;line-height:1.5}
+  /* Tooltip */
+  .info-i{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--info-soft);color:var(--info);font-size:10px;font-weight:600;margin-left:4px;cursor:help;position:relative}
+  .info-i .tip{visibility:hidden;opacity:0;transition:opacity .15s ease;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);background:#1F1F1D;color:#fff;font-size:11px;font-weight:400;line-height:1.45;padding:8px 10px;border-radius:6px;width:220px;z-index:10;text-align:left;pointer-events:none;white-space:normal}
+  .info-i:hover .tip{visibility:visible;opacity:1}
+  /* Result Cards */
+  .stat{background:var(--surface-2);border-radius:var(--radius-md);padding:14px 16px}
+  .stat .k{font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+  .stat .v{font-size:22px;font-weight:600;letter-spacing:-0.3px;color:var(--text)}
+  .stat .s{font-size:12px;color:var(--text-tertiary);margin-top:4px}
+  .stat.brand{background:var(--brand-soft)}
+  .stat.brand .v{color:var(--brand-dark)}
+  .stat.warn{background:var(--warn-soft)}
+  .stat.warn .v{color:var(--warn)}
+  .stat.info{background:var(--info-soft)}
+  .stat.info .v{color:var(--info)}
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stats-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:520px){.stats-grid-3{grid-template-columns:1fr 1fr}}
+  .section-title{font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin:18px 0 10px}
+  /* Comparison table */
+  .compare{width:100%;border-collapse:collapse;font-size:14px}
+  .compare th,.compare td{padding:10px 12px;text-align:right;border-bottom:0.5px solid var(--border)}
+  .compare th:first-child,.compare td:first-child{text-align:left;color:var(--text-secondary)}
+  .compare thead th{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border-strong)}
+  .compare tr.total td{font-weight:600;background:var(--surface-2)}
+  .compare .save{color:var(--brand-dark);font-weight:600}
+  /* EEE badges */
+  .eee{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .eee-card{border:0.5px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;background:var(--surface)}
+  .eee-card .tag{display:inline-block;font-size:11px;font-weight:600;color:var(--brand-dark);background:var(--brand-soft);padding:2px 8px;border-radius:999px;margin-bottom:6px;letter-spacing:0.04em}
+  .eee-card h4{margin:0 0 4px;font-size:13px;font-weight:600}
+  .eee-card p{margin:0;font-size:12px;color:var(--text-secondary);line-height:1.5}
+  /* Disclaimer */
+  .disclaimer{margin-top:24px;background:var(--warn-soft);border:0.5px solid #EAC68A;border-radius:var(--radius-lg);padding:16px 18px;color:#5A3704;font-size:13px;line-height:1.6}
+  .disclaimer h4{margin:0 0 6px;font-size:13px;font-weight:600;color:#5A3704;display:flex;align-items:center;gap:8px}
+  .disclaimer ul{margin:6px 0 0 18px;padding:0}
+  .disclaimer li{margin-bottom:4px}
+  /* Empty state */
+  .empty{padding:40px 20px;text-align:center;color:var(--text-tertiary);font-size:13px}
+  .empty svg{margin-bottom:8px;opacity:0.4}
+  footer.foot{margin-top:24px;color:var(--text-tertiary);font-size:12px;text-align:center}
+  .pill{display:inline-block;font-size:11px;font-weight:600;color:var(--brand-dark);background:var(--brand-soft);padding:3px 10px;border-radius:999px;letter-spacing:0.04em}
+  /* Mini-bar visualization */
+  .bar-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .bar-row .lbl{width:140px;font-size:12px;color:var(--text-secondary)}
+  .bar-row .bar{flex:1;height:10px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+  .bar-row .bar > div{height:100%;background:var(--brand)}
+  .bar-row .val{width:120px;text-align:right;font-size:12px;color:var(--text)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="brand">
+    <div class="logo-mark" aria-hidden="true">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HackerRank">
+        <!-- White H on the left: two thick vertical bars + crossbar -->
+        <rect x="18" y="28" width="13" height="44" fill="#FFFFFF"/>
+        <rect x="41" y="28" width="13" height="44" fill="#FFFFFF"/>
+        <rect x="18" y="44" width="36" height="12" fill="#FFFFFF"/>
+        <!-- Green block on the right, same height as H -->
+        <rect x="60" y="28" width="22" height="44" fill="#00EA64"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <h1>
+        <svg class="logo-wordmark" viewBox="0 0 200 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HackerRank">
+          <text x="0" y="18" font-family="Manrope, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="700" fill="#1F1F1D" letter-spacing="-0.5">HackerRank</text>
+        </svg>
+        <span class="brand-divider"></span>
+        <span style="font-weight:500;color:var(--text-secondary);font-size:16px">Corporate NPS Calculator</span>
+      </h1>
+      <p>Employer contribution under Section 80CCD(2) · for HackerRank India employees</p>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h2>Estimate the value of your NPS benefit <span class="pill">80CCD(2)</span></h2>
+    <p>This calculator helps you understand how the Corporate NPS contribution from HackerRank impacts your in-hand pay, taxes, and long-term retirement corpus. Enter a few numbers below — no personal information is collected or stored.</p>
+  </section>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <div class="card">
+      <h3><span class="dot"></span> Your inputs</h3>
+
+      <div class="row2">
+        <div class="field">
+          <div class="label"><span>Current age</span><span class="hint">years</span></div>
+          <div class="control"><input type="number" id="currentAge" min="18" max="79" value="30" /></div>
+          <div class="errmsg" id="err-currentAge">Enter an age between 18 and 79.</div>
+        </div>
+
+        <div class="field">
+          <div class="label"><span>Retirement age</span><span class="hint">60 – 80</span></div>
+          <div class="control"><input type="number" id="retirementAge" min="60" max="80" value="60" /></div>
+          <div class="errmsg" id="err-retirementAge">Retirement age must be between 60 and 80, and after current age.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">
+          <span>Fixed annual salary
+            <span class="info-i">i<span class="tip">Your fixed CTC component only. Exclude bonus, incentives, variable pay, ESOPs, and one-time payouts.</span></span>
+          </span>
+          <span class="hint">INR / year</span>
+        </div>
+        <div class="control">
+          <span class="prefix">₹</span>
+          <input type="number" id="fixedSalary" min="0" step="10000" value="1500000" />
+        </div>
+        <div class="helper">Tip: enter your gross fixed salary as per your offer / appointment letter.</div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <div class="label">
+            <span>Annual basic salary
+              <span class="info-i">i<span class="tip">Auto-calculated as 40% of your Fixed Annual Salary, in line with HackerRank's compensation structure.</span></span>
+            </span>
+            <span class="hint">auto · 40% of fixed</span>
+          </div>
+          <div class="control">
+            <span class="prefix">₹</span>
+            <input type="number" id="annualBasic" class="derived" readonly />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label"><span>Monthly basic salary</span><span class="hint">auto</span></div>
+          <div class="control">
+            <span class="prefix">₹</span>
+            <input type="number" id="monthlyBasic" class="derived" readonly />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">
+          <span>Tax regime
+            <span class="info-i">i<span class="tip">Old regime allows 10% of basic salary as NPS employer contribution deduction. New regime allows 14%. Annual cap is ₹7.5L.</span></span>
+          </span>
+        </div>
+        <select id="taxRegime">
+          <option value="new">New tax regime (default)</option>
+          <option value="old">Old tax regime</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">
+          <span>Monthly NPS contribution
+            <span class="info-i">i<span class="tip">Maximum allowed = 10% of monthly basic (Old) or 14% of monthly basic (New). Annual contribution is capped at ₹7.5 lakh.</span></span>
+          </span>
+          <span class="hint" id="capHint">max ₹0 / month</span>
+        </div>
+        <div class="control">
+          <span class="prefix">₹</span>
+          <input type="number" id="monthlyNPS" min="0" step="500" value="0" />
+        </div>
+        <div class="errmsg" id="err-monthlyNPS">Contribution exceeds the allowed limit.</div>
+      </div>
+
+      <div class="field">
+        <div class="label"><span>Annual NPS contribution</span><span class="hint">auto</span></div>
+        <div class="control">
+          <span class="prefix">₹</span>
+          <input type="number" id="annualNPS" class="derived" readonly />
+        </div>
+        <div class="helper">Hard cap: <strong>₹7,50,000 per year</strong> across all employer NPS / PF / superannuation contributions (Sec. 17(2)(vii)).</div>
+      </div>
+
+      <div class="section-title">Assumptions used</div>
+      <div class="row2">
+        <div class="field">
+          <div class="label">
+            <span>NPS expected return
+              <span class="info-i">i<span class="tip">Long-run blended return assumption across equity/corporate-debt/G-Sec under NPS Tier-I. Adjust to reflect your asset allocation choice.</span></span>
+            </span>
+            <span class="hint">% p.a.</span>
+          </div>
+          <div class="control"><input type="number" id="returnRate" min="4" max="14" step="0.5" value="10" /></div>
+        </div>
+        <div class="field">
+          <div class="label">
+            <span>Salary growth
+              <span class="info-i">i<span class="tip">Annual increment assumed on basic salary. Used to project growing NPS contributions until retirement.</span></span>
+            </span>
+            <span class="hint">% p.a.</span>
+          </div>
+          <div class="control"><input type="number" id="salaryGrowth" min="0" max="15" step="0.5" value="8" /></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card">
+      <h3><span class="dot"></span> Your results</h3>
+      <div id="results">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <h4>Important disclaimers — please read</h4>
+    <ul>
+      <li>This calculator is provided by HackerRank for <strong>informational and educational purposes only</strong>. It is not tax, investment, or financial advice.</li>
+      <li>The tax estimates use the FY 2025-26 / AY 2026-27 income tax slabs for India for the chosen regime and <strong>only consider income from your fixed salary</strong>. They do not factor in:
+        <ul>
+          <li>Bonus, ESOPs, RSUs, perquisites, variable pay, or any non-salary income</li>
+          <li>HRA, LTA, standard deduction beyond the default, 80C, 80D, home loan interest, or any other exemptions/deductions</li>
+          <li>Surcharge thresholds, cess variations, or marginal relief beyond the standard 4% cess applied</li>
+          <li>Your personal NPS contribution under 80CCD(1) and 80CCD(1B) — this tool covers <em>employer</em> contribution only</li>
+        </ul>
+      </li>
+      <li>The retirement corpus uses a simple compounding model with the rates you enter; actual NPS returns will fluctuate with market conditions and your asset allocation (E/C/G).</li>
+      <li>At retirement under current NPS rules, at least 40% of the corpus must be used to purchase an annuity; up to 60% can be withdrawn tax-free as a lump sum. Annuity income is taxable in the year of receipt.</li>
+      <li>Tax savings calculations assume the NPS contribution comes <strong>over and above</strong> your fixed CTC (a typical Corporate NPS arrangement). Confirm your actual structure with HR/Payroll.</li>
+      <li>No personally identifiable information is captured, stored, or transmitted by this calculator — all computation happens locally in your browser.</li>
+      <li>Please consult a qualified tax advisor or financial planner for advice specific to your situation.</li>
+    </ul>
+  </div>
+
+  <footer class="foot">
+    Made with ♥ by HackerRank · For internal use by HackerRank India employees · Last updated: May 2026
+  </footer>
+</div>
+
+<script>
+  // ---------- Utility ----------
+  const fmtINR = (n) => {
+    if (!isFinite(n)) return '₹0';
+    const x = Math.round(n);
+    return '₹' + x.toLocaleString('en-IN');
+  };
+  const fmtINRshort = (n) => {
+    if (!isFinite(n)) return '₹0';
+    const abs = Math.abs(n);
+    if (abs >= 1e7) return '₹' + (n/1e7).toFixed(2) + ' Cr';
+    if (abs >= 1e5) return '₹' + (n/1e5).toFixed(2) + ' L';
+    if (abs >= 1e3) return '₹' + (n/1e3).toFixed(1) + ' K';
+    return '₹' + Math.round(n);
+  };
+
+  // ---------- Tax engine (FY 25-26) ----------
+  // Standard deduction Rs 75,000 (new), Rs 50,000 (old)
+  function taxNewRegime(taxableIncome){
+    // After standard deduction
+    let income = Math.max(0, taxableIncome - 75000);
+    // Rebate u/s 87A: full rebate if taxable income (post SD) <= 12,00,000 -> tax = 0
+    const slabs = [
+      [400000, 0.00],
+      [400000, 0.05],   // 4L-8L
+      [400000, 0.10],   // 8L-12L
+      [400000, 0.15],   // 12L-16L
+      [400000, 0.20],   // 16L-20L
+      [400000, 0.25],   // 20L-24L
+      [Infinity, 0.30]  // >24L
+    ];
+    let tax = computeFromSlabs(income, slabs);
+    // Rebate
+    if (income <= 1200000) tax = 0;
+    // Cess 4%
+    tax = tax * 1.04;
+    return tax;
+  }
+  function taxOldRegime(taxableIncome){
+    let income = Math.max(0, taxableIncome - 50000);
+    const slabs = [
+      [250000, 0.00],
+      [250000, 0.05],   // 2.5L-5L
+      [500000, 0.20],   // 5L-10L
+      [Infinity, 0.30]
+    ];
+    let tax = computeFromSlabs(income, slabs);
+    if (income <= 500000) tax = 0; // 87A rebate
+    tax = tax * 1.04;
+    return tax;
+  }
+  function computeFromSlabs(income, slabs){
+    let remaining = income, tax = 0;
+    for (const [width, rate] of slabs){
+      if (remaining <= 0) break;
+      const chunk = Math.min(remaining, width);
+      tax += chunk * rate;
+      remaining -= chunk;
+    }
+    return tax;
+  }
+
+  // ---------- Core logic ----------
+  const $ = (id) => document.getElementById(id);
+
+  function readInputs(){
+    return {
+      currentAge: +$('currentAge').value,
+      retirementAge: +$('retirementAge').value,
+      fixedSalary: +$('fixedSalary').value,
+      taxRegime: $('taxRegime').value,
+      monthlyNPS: +$('monthlyNPS').value,
+      returnRate: +$('returnRate').value / 100,
+      salaryGrowth: +$('salaryGrowth').value / 100,
+    };
+  }
+
+  function validate(s){
+    let ok = true;
+    // Age
+    const ageOk = s.currentAge >= 18 && s.currentAge < 80;
+    $('currentAge').classList.toggle('error', !ageOk);
+    $('err-currentAge').classList.toggle('show', !ageOk);
+    if (!ageOk) ok = false;
+    // Retirement
+    const retOk = s.retirementAge >= 60 && s.retirementAge <= 80 && s.retirementAge > s.currentAge;
+    $('retirementAge').classList.toggle('error', !retOk);
+    $('err-retirementAge').classList.toggle('show', !retOk);
+    if (!retOk) ok = false;
+    // Fixed salary
+    const salOk = s.fixedSalary > 0;
+    $('fixedSalary').classList.toggle('error', !salOk);
+    if (!salOk) ok = false;
+    return ok;
+  }
+
+  function computeCaps(s){
+    const annualBasic = s.fixedSalary * 0.40;
+    const monthlyBasic = annualBasic / 12;
+    const pct = s.taxRegime === 'old' ? 0.10 : 0.14;
+    // Monthly cap = % of monthly basic, also annual <= min(% * annual basic, 7.5L)
+    const monthlyCapByPct = monthlyBasic * pct;
+    const annualCap = Math.min(annualBasic * pct, 750000);
+    const monthlyCap = Math.min(monthlyCapByPct, annualCap / 12);
+    return { annualBasic, monthlyBasic, pct, monthlyCap, annualCap };
+  }
+
+  function validateNPS(s, caps){
+    const monthlyOk = s.monthlyNPS >= 0 && s.monthlyNPS <= caps.monthlyCap + 0.5;
+    const annual = s.monthlyNPS * 12;
+    const annualOk = annual <= caps.annualCap + 0.5;
+    const ok = monthlyOk && annualOk;
+    $('monthlyNPS').classList.toggle('error', !ok);
+    const err = $('err-monthlyNPS');
+    if (!ok){
+      err.textContent = `Max allowed: ${fmtINR(caps.monthlyCap)}/month (${(caps.pct*100).toFixed(0)}% of monthly basic), annual cap ${fmtINR(caps.annualCap)}.`;
+      err.classList.add('show');
+    } else {
+      err.classList.remove('show');
+    }
+    return ok;
+  }
+
+  function projectCorpus(s, caps){
+    // Project a growing annual contribution (salary growth applied each year)
+    // up to retirement age. Returns are compounded annually on running corpus.
+    const years = s.retirementAge - s.currentAge;
+    if (years <= 0) return { corpus: 0, totalContrib: 0, years: 0 };
+    let corpus = 0;
+    let annualContrib = s.monthlyNPS * 12;
+    let total = 0;
+    for (let y = 0; y < years; y++){
+      // Cap each year's contribution at 7.5L
+      const yearlyContrib = Math.min(annualContrib, 750000);
+      // contribute at start of year, then grow for full year
+      corpus = (corpus + yearlyContrib) * (1 + s.returnRate);
+      total += yearlyContrib;
+      annualContrib *= (1 + s.salaryGrowth);
+    }
+    return { corpus, totalContrib: total, years };
+  }
+
+  function render(){
+    const s = readInputs();
+    const caps = computeCaps(s);
+
+    // Update derived fields
+    $('annualBasic').value = Math.round(caps.annualBasic);
+    $('monthlyBasic').value = Math.round(caps.monthlyBasic);
+    $('annualNPS').value = Math.round(s.monthlyNPS * 12);
+    $('capHint').textContent = `max ${fmtINR(caps.monthlyCap)} / month`;
+
+    const inputsOk = validate(s);
+    const npsOk = validateNPS(s, caps);
+
+    const results = $('results');
+    if (!inputsOk){
+      results.innerHTML = `<div class="empty">
+        <div>Please fill in valid values for age, retirement age, and salary to see results.</div>
+      </div>`;
+      return;
+    }
+
+    // Tax comparison
+    const fn = s.taxRegime === 'old' ? taxOldRegime : taxNewRegime;
+    const taxWithoutNPS = fn(s.fixedSalary);
+    const annualContribUsed = Math.min(s.monthlyNPS * 12, caps.annualCap);
+    // 80CCD(2) deduction reduces taxable income; we assume employer contribution is over-and-above CTC
+    // so the comparison is fixed salary vs fixed salary + NPS contribution as gross but with NPS deducted
+    const taxableWithNPS = s.fixedSalary; // because NPS is over-and-above, deducted via 80CCD(2)
+    const taxWithNPS = fn(taxableWithNPS); // same gross taxable, since NPS is deductible
+    // But the value of NPS as benefit = annualContrib (not taxed) + tax saved on it if it were salary
+    // Realistic: if NPS replaced part of salary, tax saved = tax(salary) - tax(salary - NPS)
+    const taxIfNPSWereSalary = fn(s.fixedSalary + annualContribUsed);
+    const taxSaved = taxIfNPSWereSalary - fn(s.fixedSalary);
+
+    // Corpus
+    const proj = projectCorpus(s, caps);
+    const taxFreeLump = proj.corpus * 0.60;
+    const annuityPortion = proj.corpus * 0.40;
+
+    // Build UI
+    let html = '';
+
+    // KPI row
+    html += `<div class="stats-grid-3">
+      <div class="stat brand">
+        <div class="k">Annual NPS contribution</div>
+        <div class="v">${fmtINRshort(annualContribUsed)}</div>
+        <div class="s">${fmtINR(s.monthlyNPS)} / month · ${(caps.pct*100).toFixed(0)}% of basic limit</div>
+      </div>
+      <div class="stat info">
+        <div class="k">Annual tax saved</div>
+        <div class="v">${fmtINRshort(taxSaved)}</div>
+        <div class="s">vs. taking the same amount as taxable salary</div>
+      </div>
+      <div class="stat warn">
+        <div class="k">Corpus at age ${s.retirementAge}</div>
+        <div class="v">${fmtINRshort(proj.corpus)}</div>
+        <div class="s">${proj.years} years · ${(s.returnRate*100).toFixed(1)}% p.a. assumed</div>
+      </div>
+    </div>`;
+
+    // Tax comparison table
+    html += `<div class="section-title">Tax comparison · ${s.taxRegime === 'old' ? 'Old' : 'New'} regime</div>
+    <table class="compare">
+      <thead><tr><th>Scenario</th><th>Taxable income</th><th>Income tax (incl. 4% cess)</th></tr></thead>
+      <tbody>
+        <tr><td>If NPS amount were paid as salary</td><td>${fmtINR(s.fixedSalary + annualContribUsed)}</td><td>${fmtINR(taxIfNPSWereSalary)}</td></tr>
+        <tr><td>With Corporate NPS u/s 80CCD(2)</td><td>${fmtINR(s.fixedSalary)}</td><td>${fmtINR(fn(s.fixedSalary))}</td></tr>
+        <tr class="total"><td>You save</td><td>—</td><td class="save">${fmtINR(taxSaved)} per year</td></tr>
+      </tbody>
+    </table>
+    <div class="helper">Estimated using FY 2025-26 slabs with standard deduction of ${s.taxRegime === 'old' ? '₹50,000' : '₹75,000'}. Surcharge not applied.</div>`;
+
+    // Retirement corpus details
+    html += `<div class="section-title">Retirement corpus projection</div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="k">Total contributions over ${proj.years} years</div>
+        <div class="v">${fmtINRshort(proj.totalContrib)}</div>
+        <div class="s">growing with salary at ${(s.salaryGrowth*100).toFixed(1)}% p.a.</div>
+      </div>
+      <div class="stat">
+        <div class="k">Growth from investment returns</div>
+        <div class="v">${fmtINRshort(proj.corpus - proj.totalContrib)}</div>
+        <div class="s">power of compounding at ${(s.returnRate*100).toFixed(1)}% p.a.</div>
+      </div>
+    </div>
+    <div class="bar-row"><div class="lbl">Lump-sum (60%) · tax-free</div><div class="bar"><div style="width:60%"></div></div><div class="val">${fmtINRshort(taxFreeLump)}</div></div>
+    <div class="bar-row"><div class="lbl">Annuity (40%) · taxable</div><div class="bar"><div style="width:40%;background:#BA7517"></div></div><div class="val">${fmtINRshort(annuityPortion)}</div></div>`;
+
+    // EEE
+    html += `<div class="section-title">E-E-E tax benefit</div>
+    <div class="eee">
+      <div class="eee-card">
+        <div class="tag">EXEMPT</div>
+        <h4>1. On contribution</h4>
+        <p>Employer's NPS contribution up to ${(caps.pct*100).toFixed(0)}% of basic (max ₹7.5L p.a.) is deductible u/s 80CCD(2). You save <strong>${fmtINR(taxSaved)}</strong> annually.</p>
+      </div>
+      <div class="eee-card">
+        <div class="tag">EXEMPT</div>
+        <h4>2. On growth</h4>
+        <p>Gains within the NPS account are not taxed. Compounding works on the full amount — ${fmtINRshort(proj.corpus - proj.totalContrib)} of estimated growth.</p>
+      </div>
+      <div class="eee-card">
+        <div class="tag">EXEMPT</div>
+        <h4>3. On maturity (60%)</h4>
+        <p>At retirement, up to 60% of the corpus (<strong>${fmtINRshort(taxFreeLump)}</strong>) can be withdrawn fully tax-free. The remaining 40% buys an annuity.</p>
+      </div>
+    </div>`;
+
+    results.innerHTML = html;
+  }
+
+  // ---------- Wire up ----------
+  ['currentAge','retirementAge','fixedSalary','taxRegime','monthlyNPS','returnRate','salaryGrowth'].forEach(id => {
+    $(id).addEventListener('input', render);
+    $(id).addEventListener('change', render);
+  });
+
+  // Set a sensible default for monthly NPS = 10% of monthly basic at load
+  (function setDefaults(){
+    const s = readInputs();
+    const caps = computeCaps(s);
+    $('monthlyNPS').value = Math.round(caps.monthlyBasic * 0.10 / 100) * 100;
+    render();
+  })();
+</script>
+</body>
+</html>
